@@ -4,6 +4,7 @@
 	# create prepared statements
 	# bind values
 	# return rows and results
+
 	class Database {
 		private $host = DB_HOST;
 		private $user = DB_USER;
@@ -13,6 +14,7 @@
 		private $handler;
 		private $stmt;
 		private $error;
+		private $proc;
 		
 		public function __construct() {
 			# set DSN
@@ -36,6 +38,7 @@
 		# prepare statement with query
 		public function query($sql) {
 			$this->stmt = $this->handler->prepare($sql);
+			$this->proc = $sql;
 		}
 		
 		# bind values to parameters
@@ -69,24 +72,49 @@
 		
 		# execute the prepared statement
 		public function execute() {
-			return $this->stmt->execute();
+			try {
+				$this->stmt->execute();
+				return true;
+			}
+			catch (PDOException $e) {
+				$this->error = "{$this->proc}, {$e->getMessage()}";
+				return false;
+			}
+		}
+		
+		# execute the prepared statement and return id of inserted row
+		public function executeAndGetId() {
+			if ($this->execute()) {
+				return $this->stmt->fetch(PDO::FETCH_OBJ);	
+			}
+			else {
+				return false;
+			}			
 		}
 		
 		# get result set as array of objects
-		public function resultSet() {
-			$this->execute();
-			return $this->stmt->fetchAll(PDO::FETCH_OBJ);
+		public function resultSet() {			
+			if ($this->execute()) {
+				return $this->stmt->fetchAll(PDO::FETCH_OBJ);	
+			}
+			else {
+				return false;
+			}
 		}
 		
 		# get single record as object
-		public function single() {
-			$this->execute();
-			return $this->stmt->fetch(PDO::FETCH_OBJ);
+		public function single() {			
+			if ($this->execute()) {
+				return $this->stmt->fetch(PDO::FETCH_OBJ);	
+			}
+			else {
+				return false;
+			}
 		}
 		
-		# get row count
-		public function rowCount() {
-			return $this->stmt->rowCount();
+		# get error message
+		public function getError() {
+			return $this->error;
 		}
 	}
 ?>

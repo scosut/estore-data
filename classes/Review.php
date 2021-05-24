@@ -6,42 +6,20 @@
 			$this->db = new Database();
 		}
 		
-		public function getReviewsByProductId($productId) {
-			$this->db->query("CALL spGetReviewsByProductId(:productId)");
-			$this->db->bind(":productId", $productId);
-			$results = $this->db->resultSet();
-			
-			return $results;
-		}
-		
 		public function addReview($data) {
-			$this->db->query("CALL spAddReview(:rating, :comments, :dateReviewed, :productId, :userId)");
+			$this->db->query("CALL spAddReview(:_rating, :_comments, :_dateReviewed, :_productId, :_userId)");
 			
 			$params = [
-				":rating"       => $data->rating->value, 
-				":comments"     => $data->comments->value,
-				":dateReviewed" => $data->dateReviewed->value,
-				":productId"    => $data->productId->value,
-				":userId"       => $data->userId->value
+				":_rating"       => $data->rating->value, 
+				":_comments"     => $data->comments->value,
+				":_dateReviewed" => $data->dateReviewed->value,
+				":_productId"    => $data->productId->value,
+				":_userId"       => $data->userId->value
 			];
 			
 			$this->db->bindArray($params);
 			
-			# execute
-			if ($this->db->execute()) {
-				return true;
-			}
-			else {
-				return false;
-			}
-		}
-		
-		public function getReviewById($id) {
-			$this->db->query("CALL spGetReviewById(:id)");
-			$this->db->bind(":id", $id);
-			$row = $this->db->single();
-			
-			return $row;
+			return $this->db->execute();
 		}
 	}
 ?>

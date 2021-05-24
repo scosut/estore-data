@@ -62,6 +62,37 @@
 			return self::toggleError($obj2, $test, $msg);
 		}
 		
+		public static function checkImageFile($obj, $targetDir) {
+			$errors_file   = "";
+
+			// Check if image file is a actual image or fake image
+			if (isset($_FILES['file'])) {
+				$targetFile    = $targetDir . basename($_FILES['file']["name"]);
+				$imageFileType = strtolower(pathinfo($targetFile, PATHINFO_EXTENSION));
+
+				$check = getimagesize($_FILES['file']["tmp_name"]);
+
+				if ($check !== false) {			
+					if ($_FILES['file']["size"] > 512000) {
+						$errors_file = "File size cannot exceed 500KB.";
+					}
+					else {
+						if ($imageFileType != "jpg" && $imageFileType != "jpeg" && $imageFileType != "png") {
+							$errors_file = "Only JPG, JPEG, and PNG files are allowed.";
+						}
+					}
+				} 
+				else {
+					$errors_file = $_FILES['file']["name"] . " is not an image.";
+				}
+			}
+			else {
+				$errors_file = "Please select an image";
+			}
+			
+			return self::toggleError($obj, strlen($errors_file) > 0, $errors_file);
+		}
+		
 		public static function toggleError($obj, $bln, $msg) {
 			if ($bln) {
 				$obj->error = $msg;

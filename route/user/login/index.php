@@ -7,6 +7,9 @@
 	# load Database
 	require_once "../../../classes/Database.php";
 
+	# load Product
+	require_once "../../../classes/Product.php";
+
 	# load User
 	require_once "../../../classes/User.php";
 
@@ -16,7 +19,7 @@
 	$rest_json = file_get_contents("php://input");
 	$_POST     = json_decode($rest_json, true);
 	$_POST     = filter_var_array($_POST, FILTER_SANITIZE_STRING);
-	$obj        = new User();
+	$obj       = new User();
 
 	$data = Validate::setProperties(array_keys($_POST), $_POST);
 
@@ -32,7 +35,9 @@
 		unset($user->password);
 		
 		if ($user) {
-			echo json_encode(['succeeded' => true, 'user' => $user]);
+			$obj = new Product();
+			$products = $obj->getProducts();
+			echo json_encode(['succeeded' => true, 'user' => $user, 'products' => $products]);
 		}
 		else {
 			Validate::toggleError($data->password, true, "Incorrect password.");

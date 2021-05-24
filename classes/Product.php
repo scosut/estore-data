@@ -25,68 +25,25 @@
 		}
 		
 		public function addProduct($data) {
-			$this->db->query("CALL spAddProduct(:name, :price, :image, :brand, :quantity, :description)");
+			$this->db->query("CALL spAddProduct(:_name, :_price, :_image, :_brand, :_quantity, :_description)");
 			
 			$params = [
-				":name"        => $data->name->value, 
-				":price"       => $data->price->value, 
-				":image"       => $data->image->value,
-				":brand"       => $data->brand->value,
-				":quantity"    => $data->quantity->value,
-				":description" => $data->description->value
+				":_name"        => $data->name->value, 
+				":_price"       => $data->price->value, 
+				":_image"       => $data->image->value,
+				":_brand"       => $data->brand->value,
+				":_quantity"    => $data->quantity->value,
+				":_description" => $data->description->value
 			];
 			
 			$this->db->bindArray($params);
 			
-			# execute
-			if ($this->db->execute()) {
-				return true;
-			}
-			else {
-				return false;
-			}
-		}
-		
-		public function updateProduct($data) {
-			$this->db->query("CALL spUpdateProduct(:id, :name, :price, :image, :brand, :quantity, :description)");
-			
-			$params = [
-				":id"          => $data->id->value,
-				":name"        => $data->name->value, 
-				":price"       => $data->price->value, 
-				":image"       => $data->image->value,
-				":brand"       => $data->brand->value,
-				":quantity"    => $data->quantity->value,
-				":description" => $data->description->value
-			];
-			
-			$this->db->bindArray($params);
-			
-			# execute
-			if ($this->db->execute()) {
-				return true;
-			}
-			else {
-				return false;
-			}
-		}
-		
-		public function deleteProduct($id) {
-			$this->db->query("CALL spDeleteProduct(:id)");
-			$this->db->bind(":id", $id);
-			
-			# execute
-			if ($this->db->execute()) {
-				return true;
-			}
-			else {
-				return false;
-			}
+			return $this->db->executeAndGetId();			
 		}
 		
 		public function getProductById($id) {
-			$this->db->query("CALL spGetProductById(:id)");
-			$this->db->bind(":id", $id);
+			$this->db->query("CALL spGetProductById(:_id)");
+			$this->db->bind(":_id", $id);
 			$results = $this->db->resultSet();
 			$reviews = [];
 			
@@ -104,18 +61,45 @@
 					];
 				}
 			}
-			
+						
 			return [
 				'id'           => $results[0]->productId, 
 				'name'         => $results[0]->name,
+				'price'        => $results[0]->price,
 				'image'        => $results[0]->image,
 				'brand'        => $results[0]->brand,
 				'quantity'     => $results[0]->quantity,
 				'description'  => $results[0]->description,
 				'reviewRating' => $results[0]->reviewRating,
 				'reviewCount'  => $results[0]->reviewCount,
+				'purchasers'   => explode(",", $results[0]->purchasers),
 				'reviews'      => $reviews
 			];
 		}
+		
+		public function updateProduct($data) {
+			$this->db->query("CALL spUpdateProduct(:_id, :_name, :_price, :_image, :_brand, :_quantity, :_description)");
+			
+			$params = [
+				":_id"          => $data->id->value,
+				":_name"        => $data->name->value, 
+				":_price"       => $data->price->value, 
+				":_image"       => strlen($data->image->value) > 0 ? $data->image->value : null,
+				":_brand"       => $data->brand->value,
+				":_quantity"    => $data->quantity->value,
+				":_description" => $data->description->value
+			];
+			
+			$this->db->bindArray($params);
+			
+			return $this->db->execute();
+		}
+		
+		public function deleteProduct($id) {
+			$this->db->query("CALL spDeleteProduct(:_id)");
+			$this->db->bind(":_id", $id);
+			
+			return $this->db->execute();
+		}		
 	}
 ?>
